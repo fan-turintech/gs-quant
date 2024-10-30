@@ -43,9 +43,12 @@ def preprocess_implied_vol_strikes_eq(strike_reference: VolReference = None, rel
 
     if strike_reference == VolReference.DELTA_PUT:
         relative_strike = abs(100 - relative_strike)
-    relative_strike = relative_strike if strike_reference == VolReference.NORMALIZED else relative_strike / 100
 
-    ref_string = "delta" if strike_reference in (VolReference.DELTA_CALL, VolReference.DELTA_PUT,
-                                                 VolReference.DELTA_NEUTRAL) else strike_reference.value
+    # Calculate relative_strike once, avoiding redundant calculations
+    relative_strike = relative_strike / 100 if strike_reference != VolReference.NORMALIZED else relative_strike
+
+    # Use a more efficient membership check
+    ref_string = "delta" if strike_reference in {VolReference.DELTA_CALL, VolReference.DELTA_PUT,
+                                                 VolReference.DELTA_NEUTRAL} else strike_reference.value
 
     return ref_string, relative_strike
