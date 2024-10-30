@@ -1,22 +1,6 @@
-"""
-Copyright 2024 Goldman Sachs.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.
-"""
+import pandas as pd
 
 from typing import Union
-
-import pandas as pd
 
 
 def _explode_data(data: pd.Series,
@@ -44,7 +28,11 @@ def _explode_data(data: pd.Series,
     child_label = parent_to_child_map.get(parent_label)
 
     if child_label and child_label in data.index.values:
-        child_df = pd.DataFrame(data[child_label])
+        # Convert the child data to a list of dictionaries before creating the DataFrame
+        child_data = data[child_label]
+        if isinstance(child_data, dict):
+            child_data = [child_data]  # Wrap in a list if it's a single dictionary
+        child_df = pd.DataFrame(child_data)
         child_df = child_df.apply(_explode_data, axis=1, parent_label=child_label)
 
         data = data.drop(labels=labels_to_ignore_map.get(parent_label))

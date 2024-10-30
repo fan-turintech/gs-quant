@@ -143,8 +143,10 @@ class PredefinedAssetEngine(BacktestBaseEngine):
         times = list(dict.fromkeys(times))
 
         if self.calendars is not None:
-            dates = list(compress(dates, is_business_day(dates, (None if self.calendars.lower() == 'weekend'
+            # Optimization: Use set instead of list for 'is_business_day' checks
+            business_dates = set(compress(dates, is_business_day(dates, (None if self.calendars.lower() == 'weekend'
                                                                  else self.calendars))))
+            dates = [d for d in dates if d in business_dates]
 
         for d in dates:
             if isinstance(d, dt.datetime):
